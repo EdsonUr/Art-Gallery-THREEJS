@@ -56,7 +56,7 @@ export default function Character() {
       ref={bodyRef}
       colliders={false}
       type="dynamic"
-      position={[0, 2, 2]}
+      position={[0, 1, 2]}
       lockRotations
     >
       <CapsuleCollider args={[radius, halfHeight]} />
