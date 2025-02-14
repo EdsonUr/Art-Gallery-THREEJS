@@ -18,12 +18,11 @@ const Experience = () => {
             
             <Physics gravity={[0, -9.8, 0]}>
                 <Gallery />
-                <Character controls/>
+                <Character/>
             </Physics>
     
-
-            <PointerLockControls pointerSpeed={0.4} />
           </Suspense>
+          <PointerLockControls pointerSpeed={0.4} />
 
         </Canvas>
 
