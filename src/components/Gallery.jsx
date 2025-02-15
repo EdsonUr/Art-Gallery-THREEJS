@@ -1,4 +1,4 @@
-import { useGLTF } from '@react-three/drei'
+import { Gltf, useGLTF } from '@react-three/drei'
 import { RigidBody } from '@react-three/rapier'
 import { useEffect } from 'react'
 import * as THREE from 'three'
@@ -8,7 +8,6 @@ const Gallery = () => {
 
   console.log(gltf.nodes)
 
-  console.log
   useEffect(() => {
      const lightParent = gltf.nodes['LightParent']
 
@@ -18,7 +17,7 @@ const Gallery = () => {
         lightParent.add(light)
       })
 
-  }, [])
+  }, [gltf])
 
   return (
       <group>
@@ -26,7 +25,6 @@ const Gallery = () => {
         <ambientLight intensity={0.5} />
         <RigidBody type="fixed" colliders="trimesh">
           <primitive object={gltf.scene}/>
-
         </RigidBody>
       </group>
   )

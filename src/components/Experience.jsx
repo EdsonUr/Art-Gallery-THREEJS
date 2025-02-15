@@ -1,14 +1,15 @@
 import { useState, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
-import { Suspense } from "react";
-import { Loader, PointerLockControls } from "@react-three/drei";
+import { Suspense, useEffect } from "react";
+import { Gltf, Loader, PointerLockControls } from "@react-three/drei";
 
 import Gallery from "./Gallery";
 import Character from "./Character";
 import Crosshair from "./Crosshair";
 import { CameraTour } from "../utils/CameraTour";
 import Button from "./Button";
+import PositionalAudio from "./PositionalAudio"; // New component
 
 export default function Experience() {
   const [tourActive, setTourActive] = useState(true);
@@ -25,7 +26,6 @@ export default function Experience() {
     setShowStartButton(false);
     setGameStarted(true);
     setTimeout(() => controlsRef.current.lock(), 100);
-   
   };
 
   return (
@@ -39,6 +39,8 @@ export default function Experience() {
             {gameStarted && <Character />}
           </Physics>
 
+          {gameStarted && <PositionalAudio url="audio/music.mp3" />}
+
           <PointerLockControls ref={controlsRef} pointerSpeed={0.4} enabled={gameStarted} />
 
           {tourActive && <CameraTour onTourFinished={endTour} />}
@@ -46,7 +48,6 @@ export default function Experience() {
       </Canvas>
 
       {gameStarted && <Crosshair />}
-
       {showStartButton && <Button onClick={startExperience} text="Start Experience" />}
     </>
   );
