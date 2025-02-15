@@ -24,14 +24,12 @@ export default function Experience() {
 
   const FirstFrameTracker = () => {
     const firstFrameRendered = useRef(false);
-
     useFrame(() => {
       if (!firstFrameRendered.current) {
         firstFrameRendered.current = true;
         setSceneReady(true);
       }
     });
-
     return null;
   };
 
@@ -42,23 +40,30 @@ export default function Experience() {
     }
   }, [assetsLoaded, sceneReady, tourHasRun]);
 
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      if (document.pointerLockElement) {
+        controlsRef.current?.lock();
+      }
+    };
+
+    document.addEventListener("pointerlockchange", handlePointerLockChange);
+    return () => document.removeEventListener("pointerlockchange", handlePointerLockChange);
+  }, []);
+
   const endTour = () => {
     setTourActive(false);
     setShowStartButton(true);
   };
 
-  const startExperience = (event) => {
+  const startExperience = () => {
     setShowStartButton(false);
     setGameStarted(true);
 
-    if (controlsRef.current) {
-      const canvas = document.querySelector("canvas");
+    const canvas = document.querySelector("canvas");
 
-      if (canvas?.requestPointerLock) {
-        canvas.requestPointerLock();
-      }
-
-      controlsRef.current.lock();
+    if (canvas?.requestPointerLock) {
+      canvas.requestPointerLock();
     }
   };
 
@@ -85,9 +90,9 @@ export default function Experience() {
       {gameStarted && <Crosshair />}
       {showStartButton && (
         <Button
-          onClick={startExperience} // Normal click event
-          onMouseDown={startExperience} // Ensures it works on Safari/Firefox
-          onPointerDown={startExperience} // Ensures it works on mobile/touch
+          onClick={startExperience}
+          onMouseDown={startExperience} // Ensures compatibility with Firefox & Safari
+          onPointerDown={startExperience} // Backup for different input methods
           text="Start Experience"
         />
       )}
