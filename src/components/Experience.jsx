@@ -1,31 +1,65 @@
-import { useState, useRef } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { useState, useRef, useEffect } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
-import { Suspense, useEffect } from "react";
-import { Gltf, Loader, PointerLockControls } from "@react-three/drei";
+import { Suspense } from "react";
+import { Loader, PointerLockControls, useProgress } from "@react-three/drei";
 
 import Gallery from "./Gallery";
 import Character from "./Character";
 import Crosshair from "./Crosshair";
 import { CameraTour } from "../utils/CameraTour";
 import Button from "./Button";
-import PositionalAudio from "./PositionalAudio"; // New component
+import PositionalAudio from "./PositionalAudio";
 
 export default function Experience() {
-  const [tourActive, setTourActive] = useState(true);
+  const [tourActive, setTourActive] = useState(false);
   const [showStartButton, setShowStartButton] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [tourHasRun, setTourHasRun] = useState(false);
   const controlsRef = useRef(null);
+
+  const { active } = useProgress();
+  const assetsLoaded = !active;
+
+  const FirstFrameTracker = () => {
+    const firstFrameRendered = useRef(false);
+
+    useFrame(() => {
+      if (!firstFrameRendered.current) {
+        firstFrameRendered.current = true;
+        setSceneReady(true);
+      }
+    });
+
+    return null;
+  };
+
+  useEffect(() => {
+    if (assetsLoaded && sceneReady && !tourHasRun) {
+      setTourActive(true);
+      setTourHasRun(true);
+    }
+  }, [assetsLoaded, sceneReady, tourHasRun]);
 
   const endTour = () => {
     setTourActive(false);
     setShowStartButton(true);
   };
 
-  const startExperience = () => {
+  const startExperience = (event) => {
     setShowStartButton(false);
     setGameStarted(true);
-    setTimeout(() => controlsRef.current.lock(), 100);
+
+    if (controlsRef.current) {
+      const canvas = document.querySelector("canvas");
+
+      if (canvas?.requestPointerLock) {
+        canvas.requestPointerLock();
+      }
+
+      controlsRef.current.lock();
+    }
   };
 
   return (
@@ -34,6 +68,7 @@ export default function Experience() {
 
       <Canvas camera={{ position: [0, 1.6, 5], fov: 70 }}>
         <Suspense fallback={null}>
+          <FirstFrameTracker />
           <Physics gravity={[0, -9.8, 0]}>
             <Gallery />
             {gameStarted && <Character />}
@@ -48,7 +83,14 @@ export default function Experience() {
       </Canvas>
 
       {gameStarted && <Crosshair />}
-      {showStartButton && <Button onClick={startExperience} text="Start Experience" />}
+      {showStartButton && (
+        <Button
+          onClick={startExperience} // Normal click event
+          onMouseDown={startExperience} // Ensures it works on Safari/Firefox
+          onPointerDown={startExperience} // Ensures it works on mobile/touch
+          text="Start Experience"
+        />
+      )}
     </>
   );
 }
